@@ -5,32 +5,45 @@
 #-------------------------------------------------
 
 QT       -= gui
+QT       += network xml
 
-TARGET = libqtrest
+TARGET = qtrest
 TEMPLATE = lib
 
 DEFINES += LIBQTREST_LIBRARY
 
-SOURCES += qtrest.cpp
+SOURCES += core/qtrest.cpp \
+    core/qtrestientity.cpp \
+    core/qtrestxmlparser.cpp \
+    core/qtrestxmlserializer.cpp \
+    core/qtresthttprequest.cpp \
+    core/qtresthttpconnector.cpp \
+    core/qtrestoauthrequest.cpp \
+    core/qtrestoauthdata.cpp \
+    core/qtrestoauth.cpp \
+    core/qtrestclient.cpp
 
-HEADERS += qtrest.h\
-        libqtrest_global.h
+HEADERS += core/qtrest.h\
+        core/libqtrest_global.h \
+    core/qtrestdefs.h \
+    core/qtrestientity.h \
+    core/qtrestiserializer.h \
+    core/qtrestiparser.h \
+    core/qtrestxmlparser.h \
+    core/qtrestxmlserializer.h \
+    core/qtresthttprequest.h \
+    core/qtresthttpconnector.h \
+    core/qtrestiauthentication.h \
+    core/qtrestoauthrequest.h \
+    core/qtrestoauthdata.h \
+    core/qtrestoauth.h \
+    core/qtrestclient.h
 
-symbian {
-    MMP_RULES += EXPORTUNFROZEN
-    TARGET.UID3 = 0xE57F7AD3
-    TARGET.CAPABILITY = 
-    TARGET.EPOCALLOWDLLDATA = 1
-    addFiles.sources = libqtrest.dll
-    addFiles.path = !:/sys/bin
-    DEPLOYMENT += addFiles
-}
+INCLUDEPATH += core
 
-unix:!symbian {
-    maemo5 {
-        target.path = /opt/usr/lib
-    } else {
-        target.path = /usr/lib
-    }
-    INSTALLS += target
-}
+header_files.files = $$HEADERS
+header_files.path = /usr/local/include/libqtrest
+INSTALLS += header_files
+
+target.path = /usr/local/lib
+INSTALLS += target

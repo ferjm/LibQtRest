@@ -10,7 +10,7 @@ QT       += network xml
 TARGET = qtrest
 TEMPLATE = lib
 
-DEFINES += LIBQTREST_LIBRARY
+DEFINES += LIBQTREST_LIBRARY QTREST_DEBUG
 
 SOURCES += core/qtrest.cpp \
     core/qtrestientity.cpp \

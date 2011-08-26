@@ -164,5 +164,5 @@ void HttpConnector::error(QNetworkReply::NetworkError errorCode)
 #ifdef QTREST_DEBUG
     qDebug() << "NetworkError: " << errorCodeStr;
 #endif
-    throw HttpConnectorException(QString("NetworkError: " + errorCodeStr));
+    this->lastError = QString("NetworkError: " + errorCodeStr);
 }

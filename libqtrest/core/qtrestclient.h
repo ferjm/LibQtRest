@@ -49,6 +49,21 @@ public:
     */
     void setAuthenticationData(IAuthentication *authenticationData);
 
+    /*!
+      Set the expected XML tags included within the client-server dialog
+    */
+    void setPropertiesTags(QStringList properties);
+
+    /*!
+      Set the expected XML attributes included within the client-server dialog
+     */
+    void setAttributesTags(QStringList attributes);
+
+    /*!
+      Set the expected XML namespaces included within the client-server dialog
+     */
+    void setNamespaces(QStringList namespaces);
+
 protected:
     // now the only authentication supported is oauth v1.0
     enum AuthenticationMode { OAUTH_1_0 } authenticationMode;

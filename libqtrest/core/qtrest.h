@@ -73,6 +73,21 @@ public:
      * Gets the list of namespaces
      */
     QStringList& getNamespaces();
+
+    /**
+     * Add new entity tags to the properties list
+     */
+    void addProperties(QStringList properties);
+
+    /**
+     * Add new attribute tags to the attributes list
+     */
+    void addAttributes(QStringList attributes);
+
+    /**
+     * Add new namespace tags to the namespaces list
+     */
+    void addNamespaces(QStringList namespaces);
 };
 
 #endif // QTREST_H

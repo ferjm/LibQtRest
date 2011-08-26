@@ -22,6 +22,7 @@
 #include "qtrestoauthdata.h"
 #include "qtrestoauthrequest.h"
 #include "qtrestxmlparser.h"
+#include "qtrest.h"
 
 QtRestClient::QtRestClient(int version, QObject *parent) : version(version)
 {
@@ -58,4 +59,19 @@ HttpRequest* QtRestClient::authenticatedRequest()
     default:
         return NULL;
     }
+}
+
+void QtRestClient::setPropertiesTags(QStringList properties)
+{
+    QtRest::getInstance()->addProperties(properties);
+}
+
+void QtRestClient::setAttributesTags(QStringList attributes)
+{
+    QtRest::getInstance()->addAttributes(attributes);
+}
+
+void QtRestClient::setNamespaces(QStringList namespaces)
+{
+    QtRest::getInstance()->addNamespaces(namespaces);
 }

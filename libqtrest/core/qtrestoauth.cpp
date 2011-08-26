@@ -20,10 +20,10 @@
 
 #include "qtrestoauth.h"
 #include "qtresthttpconnector.h"
+#include "qtrestxmlparser.h"
 
 #include <QDebug>
 
-//#define GOOGLE_AUTHORIZATION_URL "https://www.google.com/accounts/OAuthAuthorizeToken?oauth_token="
 
 OAuth::OAuth(QString consumerKey,QString consumerSecret,QObject *parent)
 {
@@ -37,53 +37,54 @@ OAuth::~OAuth()
     delete connector;
 }
 
-void OAuth::initRequest(OAuthRequest &request,QUrl url)
+void OAuth::initRequest(OAuthRequest &request,QUrl url, HttpRequest::RequestHttpMethod httpMethod)
 {
     request.setRequestEndpoint(url);
     request.setConsumerKey(this->consumerKey);
     request.setConsumerSecretKey(this->consumerSecret);
     request.setCallbackUrl(QUrl("oob"));
-    request.setHttpMethod(HttpRequest::GET);
+    request.setHttpMethod(httpMethod);
 }
 
-void OAuth::getRequestToken(QList<QUrl> scope, QUrl requestTokenUrl, QUrl authorizationUrl)
+void OAuth::getRequestToken(QUrl requestTokenUrl, QUrl authorizationUrl,HttpRequest::RequestHttpMethod httpMethod)
 {
     this->authorizationUrl = authorizationUrl;
     OAuthRequest request(OAuthRequest::TemporaryCredentials,this);
-    initRequest(request,requestTokenUrl);
-    QUrl scopeUrl;
-    QString scopes;
-    foreach(scopeUrl,scope)
-        scopes += scopeUrl.toString();
-    QMultiMap<QString,QString> additionalParams;
-    additionalParams.insert("scope",scopes);
-    request.setAdditionalParameters(additionalParams);
+    initRequest(request,requestTokenUrl, httpMethod);
     request.setAuthHeader();
     connect(connector, SIGNAL(requestFinished(QByteArray)), this, SLOT(onRequestTokenReceived(QByteArray)));
-    connector->httpRequest(&request);
+    try {
+        connector->httpRequest(&request);
+    } catch (HttpConnectorException ex){
+
+    }
 }
 
-void OAuth::getAccessToken(QString requestToken, QString requestTokenSecret, QString verifier, QUrl accessTokenUrl)
+void OAuth::getAccessToken(QString requestToken, QString requestTokenSecret, QString verifier, QUrl accessTokenUrl, HttpRequest::RequestHttpMethod httpMethod)
 {
     OAuthRequest request(OAuthRequest::AccessToken,this);
-    initRequest(request,accessTokenUrl);
+    initRequest(request,accessTokenUrl,httpMethod);
     request.setToken(requestToken);
     request.setTokenSecret(requestTokenSecret);
     request.setVerifier(verifier);
     request.setAuthHeader();
     connect(connector,SIGNAL(requestFinished(QByteArray)), this, SLOT(onAccessTokenReceived(QByteArray)));
-    connector->httpRequest(&request);
+    try {
+        connector->httpRequest(&request);
+    } catch (HttpConnectorException ex) {
+
+    }
 }
 
 QMultiMap<QString, QString> formatResult(QByteArray response)
-{
+{    
     QMultiMap<QString, QString> result;
     QString replyString(response);
 
     QStringList parameterPairs = replyString.split('&', QString::SkipEmptyParts);
     foreach (const QString &parameterPair, parameterPairs) {
         QStringList parameter = parameterPair.split('=');
-#ifdef QTGDATA_DEBUG
+#ifdef QTREST_DEBUG
         qDebug() << parameter.value(0) << " = " << parameter.value(1) << "\n";
 #endif
         result.insert(parameter.value(0), parameter.value(1));
@@ -93,17 +94,30 @@ QMultiMap<QString, QString> formatResult(QByteArray response)
 
 void OAuth::onRequestTokenReceived(QByteArray response)
 {
-    QMultiMap<QString, QString> result = formatResult(response);
-    QString requestToken = QUrl::fromPercentEncoding( QString(result.value("oauth_token")).toLocal8Bit() );
-    QString requestTokenSecret =  QUrl::fromPercentEncoding( QString(result.value("oauth_token_secret")).toLocal8Bit() );
-    QUrl authorizationUrl = QUrl(this->authorizationUrl.toString()+requestToken);
-    emit temporaryTokenReceived(requestToken,requestTokenSecret,authorizationUrl);
+    if(response.contains("xml")) {
+        XMLParser parser;
+        IEntity *entity = parser.parse(response,response.size());
+        qDebug() << entity->toString();
+
+    } else {
+        QMultiMap<QString, QString> result = formatResult(response);
+        QString requestToken = QUrl::fromPercentEncoding( QString(result.value("oauth_token")).toLocal8Bit() );
+        QString requestTokenSecret =  QUrl::fromPercentEncoding( QString(result.value("oauth_token_secret")).toLocal8Bit() );
+        QUrl authorizationUrl = QUrl(this->authorizationUrl.toString()+requestToken);
+        emit temporaryTokenReceived(requestToken,requestTokenSecret,authorizationUrl);
+    }
 }
 
 void OAuth::onAccessTokenReceived(QByteArray response)
 {
-    QMultiMap<QString, QString> result = formatResult(response);
-    QString accessToken = QUrl::fromPercentEncoding( QString(result.value("oauth_token")).toLocal8Bit() );
-    QString accessTokenSecret =  QUrl::fromPercentEncoding( QString(result.value("oauth_token_secret")).toLocal8Bit() );
-    emit accessTokenReceived(accessToken,accessTokenSecret);
+    if(response.contains("xml")) {
+        XMLParser parser;
+        IEntity *entity = parser.parse(response,response.size());
+        qDebug() << entity->toString();
+    } else {
+        QMultiMap<QString, QString> result = formatResult(response);
+        QString accessToken = QUrl::fromPercentEncoding( QString(result.value("oauth_token")).toLocal8Bit() );
+        QString accessTokenSecret =  QUrl::fromPercentEncoding( QString(result.value("oauth_token_secret")).toLocal8Bit() );
+        emit accessTokenReceived(accessToken,accessTokenSecret);
+    }
 }

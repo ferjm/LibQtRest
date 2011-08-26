@@ -144,7 +144,7 @@ public:
     int getNamespaceId() const { return iNamespace; }
     QString getNamespace() const { return sNamespace; }
 
-#ifdef QTGDATA_DEBUG
+#ifdef QTREST_DEBUG
     const QString toString(const unsigned int tab = 0) const;
 #endif
 

@@ -33,8 +33,9 @@ class OAuth : public QObject
 public:
     explicit OAuth(QString consumerKey = "anonymous",QString consumerSecret = "anonymous",QObject *parent = 0);
     ~OAuth();
-    void getRequestToken(QList<QUrl> scope, QUrl requestTokenUrl, QUrl authorizationUrl);
-    void getAccessToken(QString requestToken, QString requestTokenSecret, QString verifier,QUrl accessTokenUrl);
+    //TODO: add additional params
+    void getRequestToken(QUrl requestTokenUrl, QUrl authorizationUrl,HttpRequest::RequestHttpMethod httpMethod = HttpRequest::GET);
+    void getAccessToken(QString requestToken, QString requestTokenSecret, QString verifier,QUrl accessTokenUrl,HttpRequest::RequestHttpMethod httpMethod =  HttpRequest::GET);
     static void prepareRequest(OAuthRequest &request);
 
 private slots:
@@ -47,12 +48,13 @@ private:
     QString consumerSecret;
     QUrl authorizationUrl;
 
-    void initRequest(OAuthRequest &request,QUrl url);
+    void initRequest(OAuthRequest &request,QUrl url,HttpRequest::RequestHttpMethod httpMethod);
 signals:
     // This signal is emited when temporary tokens are returned from the service.
     // Note that this signal is also emited in case temporary tokens are not available.
     void temporaryTokenReceived(QString oauthToken, QString oauthTokenSecret, QUrl authorizationUrl);
     void accessTokenReceived(QString oauthToken, QString oauthTokenSecret);
+    void error(QString errorMsg);
 };
 
 #endif // OAUTH_H

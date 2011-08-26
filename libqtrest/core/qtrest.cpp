@@ -32,6 +32,21 @@ QStringList& QtRest::getNamespaces()
     return namespaces;
 }
 
+void QtRest::addProperties(QStringList properties)
+{
+    this->properties.append(properties);
+}
+
+void QtRest::addAttributes(QStringList attributes)
+{
+    this->attributes.append(attributes);
+}
+
+void QtRest::addNamespaces(QStringList namespaces)
+{
+    this->namespaces.append(namespaces);
+}
+
 QtRest* QtRest::getInstance()
 {
     return &qtrest;

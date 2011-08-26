@@ -65,6 +65,7 @@ class HttpConnector : public QObject
     QNetworkReply *reply;
     QNetworkAccessManager *manager;
     QByteArray replyData;
+    QString lastError;
 public:
     HttpConnector();
     ~HttpConnector();

@@ -24,7 +24,6 @@
 
 #include <QDebug>
 
-
 OAuth::OAuth(QString consumerKey,QString consumerSecret,QObject *parent)
 {
     connector = new HttpConnector();
@@ -97,7 +96,20 @@ void OAuth::onRequestTokenReceived(QByteArray response)
     if(response.contains("xml")) {
         XMLParser parser;
         IEntity *entity = parser.parse(response,response.size());
-        qDebug() << entity->toString();
+        IEntity::itConstEntities begin,end;
+        entity->getEntityList(begin,end);
+        if(begin != end) {
+            QString requestToken;
+            QString requestTokenSecret;
+            for(IEntity::itConstEntities it = begin; it != end; it++ ) {
+                IEntity *sit = dynamic_cast<IEntity *>(*it);
+                QString name = sit->getName();
+                if(!this->errorList.contains(name,Qt::CaseInsensitive)) {
+                    if(name == requestTokenTag) requestToken = sit->getValue(); break;
+                    if(name == requestTokenSecretTag) requestTokenSecret = sit->getValue(); break;
+                }
+            }
+        }
 
     } else {
         QMultiMap<QString, QString> result = formatResult(response);
@@ -113,7 +125,29 @@ void OAuth::onAccessTokenReceived(QByteArray response)
     if(response.contains("xml")) {
         XMLParser parser;
         IEntity *entity = parser.parse(response,response.size());
-        qDebug() << entity->toString();
+        IEntity::itConstEntities begin,end;
+        entity->getEntityList(begin,end);
+        if(begin != end) {
+            if(this->errorList.contains(entity->getName(),Qt::CaseInsensitive)) {
+                QMultiMap<QString,QString> errorMap;
+                for(IEntity::itConstEntities it = begin; it != end; it++ ) {
+                    IEntity *sit = dynamic_cast<IEntity *>(*it);
+                    errorMap.insert(sit->getName(),sit->getValue());
+                }
+                emit error(errorMap);
+            } else {
+                QString accessToken;
+                QString accessTokenSecret;
+                for(IEntity::itConstEntities it = begin; it != end; it++ ) {
+                    IEntity *sit = dynamic_cast<IEntity *>(*it);
+                    QString name = sit->getName();
+                    if(!this->errorList.contains(name,Qt::CaseInsensitive)) {
+                        if(name == accessTokenTag) accessToken = sit->getValue(); break;
+                        if(name == accessTokenSecretTag) accessTokenSecret = sit->getValue(); break;
+                    }
+                }
+            }
+        }
     } else {
         QMultiMap<QString, QString> result = formatResult(response);
         QString accessToken = QUrl::fromPercentEncoding( QString(result.value("oauth_token")).toLocal8Bit() );

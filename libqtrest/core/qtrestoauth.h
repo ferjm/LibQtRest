@@ -27,6 +27,11 @@
 #include "qtrestoauthrequest.h"
 #include "qtresthttpconnector.h"
 
+static QString requestTokenTag = "oauth_token";
+static QString requestTokenSecretTag = "oauth_token_secret";
+static QString accessTokenTag = "oauth_token";
+static QString accessTokenSecretTag = "oauth_token_secret";
+
 class OAuth : public QObject
 {
     Q_OBJECT
@@ -38,6 +43,13 @@ public:
     void getAccessToken(QString requestToken, QString requestTokenSecret, QString verifier,QUrl accessTokenUrl,HttpRequest::RequestHttpMethod httpMethod =  HttpRequest::GET);
     static void prepareRequest(OAuthRequest &request);
 
+    void setRequestTokenTag(QString tag) { requestTokenTag = tag; }
+    void setRequestTokenSecretTag(QString tag) {requestTokenSecretTag = tag; }
+    void setAccessTokenTag(QString tag) { accessTokenTag = tag; }
+    void setAccessTokenSecretTag(QString tag) { accessTokenSecretTag = tag; }
+
+    void setTagErrorList(QStringList errors) { errorList = errors; }
+
 private slots:
     void onRequestTokenReceived(QByteArray response);
     void onAccessTokenReceived(QByteArray response);
@@ -46,7 +58,8 @@ private:
     HttpConnector *connector;
     QString consumerKey;
     QString consumerSecret;
-    QUrl authorizationUrl;
+    QUrl authorizationUrl;        
+    QStringList errorList;
 
     void initRequest(OAuthRequest &request,QUrl url,HttpRequest::RequestHttpMethod httpMethod);
 signals:
@@ -54,7 +67,7 @@ signals:
     // Note that this signal is also emited in case temporary tokens are not available.
     void temporaryTokenReceived(QString oauthToken, QString oauthTokenSecret, QUrl authorizationUrl);
     void accessTokenReceived(QString oauthToken, QString oauthTokenSecret);
-    void error(QString errorMsg);
+    void error(QMultiMap<QString,QString> errorMsg);
 };
 
 #endif // OAUTH_H

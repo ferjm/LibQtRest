@@ -99,15 +99,26 @@ void OAuth::onRequestTokenReceived(QByteArray response)
         IEntity::itConstEntities begin,end;
         entity->getEntityList(begin,end);
         if(begin != end) {
-            QString requestToken;
-            QString requestTokenSecret;
-            for(IEntity::itConstEntities it = begin; it != end; it++ ) {
-                IEntity *sit = dynamic_cast<IEntity *>(*it);
-                QString name = sit->getName();
-                if(!this->errorList.contains(name,Qt::CaseInsensitive)) {
-                    if(name == requestTokenTag) requestToken = sit->getValue(); break;
-                    if(name == requestTokenSecretTag) requestTokenSecret = sit->getValue(); break;
+            if(this->errorList.contains(entity->getName(),Qt::CaseInsensitive)) {
+                QMultiMap<QString,QString> errorMap;
+                for(IEntity::itConstEntities it = begin; it != end; it++ ) {
+                    IEntity *sit = dynamic_cast<IEntity *>(*it);
+                    errorMap.insert(sit->getName(),sit->getValue());
                 }
+                emit error(errorMap);
+            } else {
+                QString requestToken;
+                QString requestTokenSecret;
+                for(IEntity::itConstEntities it = begin; it != end; it++ ) {
+                    IEntity *sit = dynamic_cast<IEntity *>(*it);
+                    QString name = sit->getName();
+                    if(!this->errorList.contains(name,Qt::CaseInsensitive)) {
+                        if(name == requestTokenTag) requestToken = sit->getValue(); break;
+                        if(name == requestTokenSecretTag) requestTokenSecret = sit->getValue(); break;
+                    }
+                }
+                if((!requestToken.isEmpty()) && (!requestTokenSecret.isEmpty()))
+                    emit temporaryTokenReceived(requestToken,requestTokenSecret,QUrl(this->authorizationUrl.toString()+requestToken));
             }
         }
 
@@ -146,6 +157,8 @@ void OAuth::onAccessTokenReceived(QByteArray response)
                         if(name == accessTokenSecretTag) accessTokenSecret = sit->getValue(); break;
                     }
                 }
+                if((!accessToken.isEmpty()) && (!accessTokenSecret.isEmpty()))
+                    emit accessTokenReceived(accessToken,accessTokenSecret);
             }
         }
     } else {

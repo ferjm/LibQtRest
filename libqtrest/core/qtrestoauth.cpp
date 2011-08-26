@@ -53,7 +53,8 @@ void OAuth::getRequestToken(QUrl requestTokenUrl, QUrl authorizationUrl,HttpRequ
     request.setAuthHeader();
     connect(connector, SIGNAL(requestFinished(QByteArray)), this, SLOT(onRequestTokenReceived(QByteArray)));
     try {
-        connector->httpRequest(&request);
+        QByteArray replyData = connector->httpRequest(&request);
+        qDebug() << "Reply from getRequestToken " + replyData;
     } catch (HttpConnectorException ex){
 
     }

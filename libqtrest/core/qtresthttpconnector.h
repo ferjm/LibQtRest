@@ -69,7 +69,7 @@ class HttpConnector : public QObject
 public:
     HttpConnector();
     ~HttpConnector();
-    void httpRequest(const HttpRequest *request);
+    QByteArray httpRequest(const HttpRequest *request);
 
 public slots:
     void finished(QNetworkReply *);

@@ -44,7 +44,7 @@ HttpConnector::~HttpConnector()
     delete manager;
 }
 
-void HttpConnector::httpRequest(const HttpRequest *request)
+QByteArray HttpConnector::httpRequest(const HttpRequest *request)
 {
     replyData.clear();
 #ifdef QTREST_DEBUG
@@ -61,50 +61,53 @@ void HttpConnector::httpRequest(const HttpRequest *request)
 #endif
         networkRequest.setRawHeader((*it).first,(*it).second);
     }
-    QEventLoop *loop = new QEventLoop;
-    HttpRequest::RequestHttpMethod httpMethod = request->getHttpMethod();
-    switch(httpMethod)
     {
-    case HttpRequest::GET:
-#ifdef QTREST_DEBUG
-        qDebug() << "GET\n";
-#endif
-        reply = manager->get(networkRequest);
-        break;
-    case HttpRequest::POST: {
-        const QByteArray body = request->getRequestBody();
-#ifdef QTREST_DEBUG
-        qDebug() << "POST\n";
-        qDebug() << "Body: " << body;
-#endif
-        reply = manager->post(networkRequest,body);
-        break; }
-    case HttpRequest::PUT: {
-        const QByteArray body = request->getRequestBody();
-#ifdef QTREST_DEBUG
-        qDebug() << "PUT\n";
-        qDebug() << "Body: " << body;
-#endif
-        reply = manager->put(networkRequest,body);
-        break; }
-    case HttpRequest::HEAD:
-#ifdef QTREST_DEBUG
-        qDebug() << "PUT\n";
-#endif
-        reply = manager->head(networkRequest);
-        break;
-    case HttpRequest::DELETE:
-#ifdef QTREST_DEBUG
-        qDebug() << "DELETE\n";
-#endif
-        reply = manager->deleteResource(networkRequest);
-        break;
+        QEventLoop *loop = new QEventLoop;
+        HttpRequest::RequestHttpMethod httpMethod = request->getHttpMethod();
+        switch(httpMethod)
+        {
+        case HttpRequest::GET:
+    #ifdef QTREST_DEBUG
+            qDebug() << "GET\n";
+    #endif
+            reply = manager->get(networkRequest);
+            break;
+        case HttpRequest::POST: {
+            const QByteArray body = request->getRequestBody();
+    #ifdef QTREST_DEBUG
+            qDebug() << "POST\n";
+            qDebug() << "Body: " << body;
+    #endif
+            reply = manager->post(networkRequest,body);
+            break; }
+        case HttpRequest::PUT: {
+            const QByteArray body = request->getRequestBody();
+    #ifdef QTREST_DEBUG
+            qDebug() << "PUT\n";
+            qDebug() << "Body: " << body;
+    #endif
+            reply = manager->put(networkRequest,body);
+            break; }
+        case HttpRequest::HEAD:
+    #ifdef QTREST_DEBUG
+            qDebug() << "PUT\n";
+    #endif
+            reply = manager->head(networkRequest);
+            break;
+        case HttpRequest::DELETE:
+    #ifdef QTREST_DEBUG
+            qDebug() << "DELETE\n";
+    #endif
+            reply = manager->deleteResource(networkRequest);
+            break;
+        }
+        loop->connect(reply, SIGNAL(readyRead()), this, SLOT(readyRead()));
+        loop->connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(finished(QNetworkReply*)));
+        loop->connect(manager, SIGNAL(finished(QNetworkReply *)),loop, SLOT(quit()));
+        loop->connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(error(QNetworkReply::NetworkError)));
+        loop->exec();
     }
-    connect(reply, SIGNAL(readyRead()), this, SLOT(readyRead()));
-    connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(finished(QNetworkReply*)));
-    connect(manager, SIGNAL(finished(QNetworkReply *)),loop, SLOT(quit()));
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(error(QNetworkReply::NetworkError)));
-    loop->exec();
+    return replyData;
 }
 
 void HttpConnector::finished(QNetworkReply *mReply)

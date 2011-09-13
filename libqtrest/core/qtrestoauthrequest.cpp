@@ -67,16 +67,16 @@ void OAuthRequest::prepareRequest()
         insertAdditionalParams(requestParameters);
         break;
 
-    case OAuthRequest::AuthorizedRequest:
+    case OAuthRequest::AuthorizedRequest: {
         requestParameters.append( qMakePair( OAUTH_KEY_SIGNATURE_METHOD, oauthSignatureMethod ));
         requestParameters.append( qMakePair( OAUTH_KEY_CONSUMER_KEY, oauthConsumerKey ));
-        requestParameters.append( qMakePair( OAUTH_KEY_VERSION, oauthVersion ));
+        //requestParameters.append( qMakePair( OAUTH_KEY_VERSION, oauthVersion ));
         requestParameters.append( qMakePair( OAUTH_KEY_TIMESTAMP, this->oauthTimestamp() ));
         requestParameters.append( qMakePair( OAUTH_KEY_NONCE, this->oauthNonce() ));
-        requestParameters.append( qMakePair( OAUTH_KEY_TOKEN, oauthToken ));
+        requestParameters.append( qMakePair( OAUTH_KEY_TOKEN, oauthToken ));                
         insertAdditionalParams(requestParameters);
         break;
-
+    }
     default:
         break;
     }
@@ -106,7 +106,7 @@ void OAuthRequest::insertAdditionalParams(QList<QPair<QString,QString> > &reques
     QList<QString> additionalValues = this->additionalParams.values();
     for(int i=0; i<additionalKeys.size(); i++)
         requestParams.append( qMakePair(QString(additionalKeys.at(i)),
-                                            QString(additionalValues.at(i))));
+                                            QString(additionalValues.at(i))));    
     if(this->httpMethod == HttpRequest::POST) {
         insertPostBody();
     }
@@ -211,6 +211,11 @@ QByteArray OAuthRequest::requestBaseString()
     baseString.append( QUrl::toPercentEncoding( requestEndpoint.toString(QUrl::RemoveQuery) ) + "&" );
     QList< QPair<QString, QString> > baseStringParameters;
     baseStringParameters.append(requestParameters);
+    QList<QPair<QByteArray, QByteArray> > queryParams= requestEndpoint.encodedQueryItems();
+    for (int i=0;i<queryParams.size();i++)
+        baseStringParameters.append(qMakePair(QString(queryParams.at(i).first),QString(queryParams.at(i).second)));
+    //baseStringParameters.append(additionalParams);
+
     // Sort the request parameters. These parameters have been
     // initialized earlier.
     qSort(baseStringParameters.begin(),

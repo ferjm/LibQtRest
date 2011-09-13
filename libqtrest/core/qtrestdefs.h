@@ -34,7 +34,13 @@ namespace Id
         mockId,
         mockId2,
         mockId3,
-        mockId4
+        mockId4,
+        smsText,
+        address,
+        message,
+        originAddress,
+        phoneNumber,
+        alias
     )
 }
 
@@ -54,7 +60,9 @@ namespace NamespaceId {
     Ids
     (
         NULLID,
-        mockId
+        mockId,
+        tns,
+        tns1
     )
 }
 

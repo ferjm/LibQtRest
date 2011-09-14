@@ -117,8 +117,9 @@ void XMLSerializer::serialize(const IEntity *obj, QXmlStreamWriter *stream)
 QString XMLSerializer::serialize(const IEntity *obj)
 {
     if((obj == NULL) || (!obj->isValid())) throw XMLSerializerException("Invalid entity\n");
-    QString output;
+    QByteArray output;
     QXmlStreamWriter stream(&output);
+    stream.setCodec("UTF-8");
     stream.writeStartDocument();
     if(!_namespace.isEmpty())
         stream.writeDefaultNamespace(_namespace);
@@ -137,5 +138,5 @@ QString XMLSerializer::serialize(const IEntity *obj)
     serialize(obj,&stream);
     stream.writeEndElement();
     stream.writeEndDocument();
-    return output;
+    return QString(output);
 }

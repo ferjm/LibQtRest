@@ -62,7 +62,7 @@ QByteArray HttpConnector::httpRequest(const HttpRequest *request)
         networkRequest.setRawHeader((*it).first,(*it).second);
     }
     {
-        QEventLoop *loop = new QEventLoop;
+        QEventLoop *loop = new QEventLoop(this);
         HttpRequest::RequestHttpMethod httpMethod = request->getHttpMethod();
         switch(httpMethod)
         {

@@ -62,7 +62,9 @@ namespace NamespaceId {
         NULLID,
         mockId,
         tns,
-        tns1
+        tns1,
+        tns2,
+        tns3
     )
 }
 

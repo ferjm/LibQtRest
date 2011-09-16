@@ -40,7 +40,13 @@ namespace Id
         message,
         originAddress,
         phoneNumber,
-        alias
+        alias,
+        ClientException,
+        exceptionCategory,
+        exceptionId,
+        text,
+        smsDeliveryStatus,
+        deliveryStatus
     )
 }
 

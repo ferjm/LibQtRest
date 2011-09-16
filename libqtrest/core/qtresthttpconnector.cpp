@@ -112,6 +112,13 @@ QByteArray HttpConnector::httpRequest(const HttpRequest *request)
 
 void HttpConnector::finished(QNetworkReply *mReply)
 {
+    const QList<QNetworkReply::RawHeaderPair> headerList = mReply->rawHeaderPairs();
+#ifdef QTREST_DEBUG
+    qDebug() << "HTTP Reply header: \n\t";
+    for(int i=0;i<headerList.size();i++)
+        qDebug() << headerList.at(i).first << ": " << headerList.at(i).second;
+#endif
+    emit headersRetrieved(headerList);
     mReply->deleteLater();
 }
 
@@ -119,7 +126,7 @@ void HttpConnector::readyRead()
 {
     replyData = reply->readAll();
 #ifdef QTREST_DEBUG
-    qDebug() << "HTTP Reply: \n\t" << replyData;
+    qDebug() << "HTTP Reply body: \n\t" << replyData;
 #endif
     //TODO: parse replyData and return IEntity body + header
     emit requestFinished(replyData);

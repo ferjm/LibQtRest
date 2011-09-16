@@ -78,6 +78,7 @@ public slots:
 
 signals:
     void requestFinished(QByteArray reply);
+    void headersRetrieved(QList<QNetworkReply::RawHeaderPair> headers);
 };
 
 #endif // HTTPCONNECTOR_H

@@ -61,7 +61,7 @@ QByteArray HttpConnector::httpRequest(const HttpRequest *request)
 #endif
         networkRequest.setRawHeader((*it).first,(*it).second);
     }
-    {
+
         QEventLoop *loop = new QEventLoop(this);
         HttpRequest::RequestHttpMethod httpMethod = request->getHttpMethod();
         switch(httpMethod)
@@ -106,7 +106,7 @@ QByteArray HttpConnector::httpRequest(const HttpRequest *request)
         loop->connect(manager, SIGNAL(finished(QNetworkReply *)),loop, SLOT(quit()));
         loop->connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(error(QNetworkReply::NetworkError)));
         loop->exec();
-    }
+
     return replyData;
 }
 
@@ -175,4 +175,5 @@ void HttpConnector::error(QNetworkReply::NetworkError errorCode)
     qDebug() << "NetworkError: " << errorCodeStr;
 #endif
     this->lastError = QString("NetworkError: " + errorCodeStr);
+    emit requestError(this->lastError);
 }

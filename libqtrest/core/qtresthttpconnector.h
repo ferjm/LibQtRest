@@ -79,6 +79,7 @@ public slots:
 signals:
     void requestFinished(QByteArray reply);
     void headersRetrieved(QList<QNetworkReply::RawHeaderPair> headers);
+    void requestError(QString error);
 };
 
 #endif // HTTPCONNECTOR_H
